@@ -1,0 +1,100 @@
+<!DOCTYPE html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0aa874"><title>SI GROUP — Elektr montaj</title>
+<style>
+:root{--bg:#f4f6f5;--c:#fff;--t:#10202a;--m:#7a8a90;--g:#0aa874;--gl:#e4f5ee;--d:#10202a;--r:#e5484d;--l:#dfe5e3;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0b161c;--c:#14252d;--t:#eef3f2;--m:#8fa3a9;--gl:#16382f;--d:#06100d;--l:#2a3d44;color-scheme:dark}}
+*{box-sizing:border-box}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--t);font:15px/1.4 system-ui,-apple-system,sans-serif}
+#app{max-width:520px;margin:0 auto;height:100%;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0)}
+header{display:flex;align-items:center;gap:10px;padding:12px 16px}.lg{width:32px;height:32px;border-radius:9px;background:var(--g);color:#fff;font-weight:800;display:grid;place-items:center}
+header small{display:block;color:var(--m);font-size:10px}main{flex:1;overflow:auto;padding:0 16px 16px}h2{margin:4px 0 2px;font-size:24px}.m{color:var(--m);font-size:13px}
+.card{background:var(--c);border-radius:16px;padding:14px;margin:10px 0;border:1px solid var(--l)}.row{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.bar{height:7px;background:var(--l);border-radius:5px;overflow:hidden;margin:8px 0 4px}.bar i{display:block;height:100%;background:var(--g)}
+button,select,input{font:inherit;color:var(--t)}.btn{width:100%;background:var(--g);color:#fff;border:0;border-radius:12px;padding:12px;font-weight:700;margin-top:8px}.btn.s{width:auto;padding:6px 12px;margin:0;font-size:13px}.btn.o{background:var(--c);color:var(--t);border:1px solid var(--l)}.btn.r{background:var(--r)}
+select,input{width:100%;padding:11px;border-radius:10px;border:1px solid var(--l);background:var(--c);margin:4px 0 8px}
+nav{display:flex;background:var(--c);border-top:1px solid var(--l);padding:6px 4px calc(8px + env(safe-area-inset-bottom,0))}nav button{flex:1;background:none;border:0;color:var(--m);font-size:11px}nav button span{display:block;font-size:19px}nav .on{color:var(--g);font-weight:700}
+.back{background:none;border:0;color:var(--g);font-weight:700;padding:6px 0}.item{display:flex;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid var(--l)}.item:last-child{border:0}
+.pill{background:var(--gl);color:var(--g);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:600;white-space:nowrap}.wait{background:#fdecc8;color:#a0710b}
+.plan{position:relative;border-radius:12px;overflow:hidden;border:1px solid var(--l);background:#fff;touch-action:manipulation}.plan img{width:100%;display:block}.plan svg{position:absolute;inset:0;width:100%;height:100%}
+</style></head><body><div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+// ====== SOZLAMA: Supabase > Project Settings > API dan oling ======
+const SUPABASE_URL="https://vmkrtplwufrzvwkbylxp.supabase.co", SUPABASE_KEY="sb_publishable_PndvP80EvNUUr0ZBJDLggA_y4dlnZzF", DOMAIN="si.local";
+// =================================================================
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+const SB=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const RN={director:"Direktor",master:"Master",assistant:"Yordamchi",intern:"Stajyor"},KN={cable:"Kabel",socket:"Rozetka",light:"Yoritish",panel:"Shchit"};
+let me,tab="obj",oid=null,did=null,drawing=null,pts=null,kind="cable";
+const $=s=>document.querySelector(s),A=$("#app"),isD=()=>me.role=="director",ap=()=>isD()||me.role=="master";
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fm=n=>Math.round(n).toLocaleString("ru-RU"),bar=p=>`<div class="bar"><i style="width:${p}%"></i></div>`;
+const pc=ls=>ls.length?Math.round(ls.filter(l=>l.done).length/ls.length*100):0;
+const err=e=>{if(e){alert("Xatolik: "+e.message);return true}};
+
+async function boot(){const{data:{session}}=await SB.auth.getSession();
+ if(!session)return loginView();
+ const{data,error}=await SB.from("profiles").select("*").eq("id",session.user.id).single();
+ if(error)return loginView();me=data;show()}
+function loginView(){A.innerHTML=`<main style="display:flex;flex-direction:column;justify-content:center"><div class="lg" style="width:64px;height:64px;font-size:28px;margin:auto">⚡</div><h2 style="text-align:center;margin-top:12px">SI GROUP</h2><div class="m" style="text-align:center;margin-bottom:16px">Elektr montaj ishlarini boshqarish tizimi</div><div class="m">LOGIN</div><input id="lg" autocapitalize="off" placeholder="Loginni kiriting"><div class="m">PAROL</div><input id="ps" type="password" placeholder="••••••"><button class="btn" onclick="login()">Kirish</button><div class="m" style="text-align:center;margin-top:14px">Faqat SI GROUP xodimlari uchun</div></main>`}
+async function login(){const{error}=await SB.auth.signInWithPassword({email:$("#lg").value.trim().toLowerCase()+"@"+DOMAIN,password:$("#ps").value});
+ if(error)return alert("Login yoki parol notoʻgʻri");boot()}
+async function out(){await SB.auth.signOut();me=null;loginView()}
+function go(t){tab=t;oid=did=null;pts=null;show()}
+
+async function show(){
+ A.innerHTML=`<header><div class="lg">S</div><div><b>SI GROUP</b><small>ELEKTR MONTAJ</small></div></header><main id="mn"><div class="m">Yuklanmoqda…</div></main><nav>${[["obj","Obyektlar","▤"],["work","Ishlar","✓"],["me","Profil","☺"]].map(t=>`<button class="${tab==t[0]?"on":""}" onclick="go('${t[0]}')"><span>${t[2]}</span>${t[1]}</button>`).join("")}</nav>`;
+ $("#mn").innerHTML=await(did?drawView():oid?objView():tab=="obj"?objList():tab=="work"?workView():meView())}
+
+/* ---------- OBYEKTLAR ---------- */
+async function objList(){const{data}=await SB.from("objects").select("*,drawings(lines(done))").order("created_at",{ascending:false});
+ return `<h2>Obyektlar</h2><div class="m">${data.length} ta obyekt</div>${isD()?`<button class="btn o" onclick="newObj()">+ Yangi obyekt</button>`:""}`+
+ data.map(o=>{const ls=o.drawings.flatMap(d=>d.lines),p=pc(ls);return `<div class="card" onclick="oid='${o.id}';show()"><div class="row"><b>${esc(o.name)}</b><span class="m">${o.deadline?esc(o.deadline):""}</span></div><div class="m">${esc(o.note)}</div>${bar(p)}<div class="m">${ls.filter(l=>l.done).length}/${ls.length} liniya · ${p}%</div></div>`}).join("")}
+async function newObj(){const name=prompt("Obyekt nomi:");if(!name)return;const deadline=prompt("Muddat (YYYY-MM-DD), boʻsh qoldirsa ham boʻladi:")||null;
+ if(err((await SB.from("objects").insert({name,deadline})).error))return;show()}
+async function objView(){const{data:o}=await SB.from("objects").select("*").eq("id",oid).single(),{data:ds}=await SB.from("drawings").select("*,lines(done)").eq("object_id",oid).order("created_at");
+ return `<button class="back" onclick="oid=null;show()">← Obyektlar</button><h2>${esc(o.name)}</h2><div class="m">${esc(o.note)}</div>
+ ${isD()?`<input type="file" id="fl" accept="application/pdf,image/*" hidden onchange="upload(this.files[0])"><button class="btn" onclick="$('#fl').click()">+ Chizma yuklash (PDF yoki rasm)</button>`:""}
+ ${ds.map(d=>`<div class="card" onclick="did='${d.id}';show()"><div class="row"><b>${esc(d.title)}</b><span class="pill">${pc(d.lines)}%</span></div>${bar(pc(d.lines))}<div class="m">${d.lines.filter(l=>l.done).length}/${d.lines.length} liniya</div></div>`).join("")||'<div class="card m">Hali chizma yuklanmagan</div>'}`}
+async function upload(f){if(!f)return;const title=prompt("Chizma nomi (masalan: 2-qavat):",f.name.replace(/\.\w+$/,""));if(!title)return;
+ try{let blob=f;if(f.type=="application/pdf"){const pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,pg=await pdf.getPage(1),vp=pg.getViewport({scale:2.2}),cv=document.createElement("canvas");cv.width=vp.width;cv.height=vp.height;await pg.render({canvasContext:cv.getContext("2d"),viewport:vp}).promise;blob=await new Promise(r=>cv.toBlob(r,"image/png"))}
+ const path=oid+"/"+crypto.randomUUID()+".png",{error}=await SB.storage.from("drawings").upload(path,blob,{contentType:blob.type||"image/png"});if(err(error))return;
+ if(err((await SB.from("drawings").insert({object_id:oid,title,image_path:path})).error))return;show()}catch(e){alert("Fayl oʻqilmadi: "+e.message)}}
+
+/* ---------- CHIZMA ---------- */
+async function drawView(){const{data:d}=await SB.from("drawings").select("*,lines(*)").eq("id",did).single(),{data:u}=await SB.storage.from("drawings").createSignedUrl(d.image_path,3600);
+ drawing=d;return `<button class="back" onclick="did=null;pts=null;show()">← Orqaga</button><h2>${esc(d.title)}</h2><div class="m">${d.lines.filter(l=>l.done).length}/${d.lines.length} bajarilgan · ${pc(d.lines)}%</div>
+ <div class="plan" id="pl"><img id="im" src="${u.signedUrl}" onload="paint()"><svg id="sv" onclick="tap(event)"></svg></div>
+ <div class="m" style="margin:6px 0">🟢 Bajarilgan &nbsp; 🔴 Qolgan ${ap()?"· Liniyani bosing — holatini oʻzgartirish":""}</div>
+ ${isD()?`<div class="card"><b>Liniya chizish</b><select onchange="kind=this.value">${Object.entries(KN).map(k=>`<option value="${k[0]}" ${kind==k[0]?"selected":""}>${k[1]}</option>`).join("")}</select>
+ ${pts?`<div class="m">${pts.length} nuqta. Chizma ustiga bosib davom eting.</div><div class="row"><button class="btn s" onclick="saveLine()">Saqlash</button><button class="btn s o" onclick="pts=null;paint()">Bekor</button></div>`:`<button class="btn" onclick="pts=[];show2()">Chizishni boshlash</button>`}</div>`:""}`}
+function show2(){did&&show()}
+function paint(){const im=$("#im"),sv=$("#sv");if(!im||!sv)return;const W=1000,H=Math.round(W*im.naturalHeight/im.naturalWidth);sv.setAttribute("viewBox",`0 0 ${W} ${H}`);sv.dataset.h=H;
+ const col=l=>l.done?"#0aa874":"#e5484d";
+ sv.innerHTML=drawing.lines.map(l=>`<polyline data-id="${l.id}" points="${l.points.map(p=>p.join(",")).join(" ")}" fill="none" stroke="${col(l)}" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" style="pointer-events:stroke"/>`).join("")+
+ (pts&&pts.length?`<polyline points="${pts.map(p=>p.join(",")).join(" ")}" fill="none" stroke="#2563eb" stroke-width="7" stroke-dasharray="14 8"/>`+pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="9" fill="#2563eb"/>`).join(""):"")}
+async function tap(e){const sv=$("#sv");
+ if(pts){const r=sv.getBoundingClientRect(),H=+sv.dataset.h;pts.push([Math.round((e.clientX-r.left)/r.width*1000),Math.round((e.clientY-r.top)/r.height*H)]);return paint()}
+ const el=e.target.closest("polyline[data-id]");if(!el||!ap())return;const l=drawing.lines.find(x=>x.id==el.dataset.id),done=!l.done;
+ if(err((await SB.from("lines").update({done,done_by:done?me.id:null,done_at:done?new Date().toISOString():null}).eq("id",l.id)).error))return;
+ l.done=done;paint()}
+async function saveLine(){if(!pts||pts.length<2)return alert("Kamida 2 ta nuqta qoʻying");
+ if(err((await SB.from("lines").insert({drawing_id:did,kind,points:pts})).error))return;pts=null;show()}
+
+/* ---------- ISHLAR ---------- */
+async function workView(){const[{data:os},{data:ts},{data:ws}]=await Promise.all([SB.from("objects").select("id,name"),SB.from("tariffs").select("*"),SB.from("works").select("*,profiles(full_name),objects(name)").order("created_at",{ascending:false}).limit(60)]);
+ window._T=Object.fromEntries(ts.map(t=>[t.kind,t]));const mine=ws.filter(w=>w.user_id==me.id).slice(0,5),pend=ws.filter(w=>w.status=="pending");
+ return `<h2>Kunlik hisobot</h2><div class="m">Bugun bajargan ishingizni kiriting</div><div class="card"><div class="m">OBYEKT</div><select id="o">${os.map(o=>`<option value="${o.id}">${esc(o.name)}</option>`).join("")}</select><div class="m">ISH TURI</div><select id="k">${ts.map(t=>`<option value="${t.kind}">${esc(t.label)} (${t.unit})</option>`).join("")}</select><div class="m">MIQDORI</div><input id="q" type="number" inputmode="decimal" min="0" placeholder="Masalan: 25"><button class="btn" onclick="addWork()">Tasdiqqa yuborish</button></div>
+ <div class="card"><b>Mening oxirgi ishlarim</b>${mine.map(w=>`<div class="item"><span>${esc(_T[w.kind].label)}<br><span class="m">${w.qty} ${_T[w.kind].unit} · ${esc(w.objects.name)}</span></span><span class="pill ${w.status=="approved"?"":"wait"}">${w.status=="approved"?"Tasdiqlandi":"Kutilmoqda"}</span></div>`).join("")||'<div class="m">Hali ish yoʻq</div>'}</div>
+ ${ap()?`<div class="card"><b>Tasdiq kutmoqda (${pend.length})</b>${pend.map(w=>`<div class="item"><span>${esc(w.profiles.full_name)}<br><span class="m">${esc(_T[w.kind].label)} · ${w.qty} ${_T[w.kind].unit}</span></span><button class="btn s" onclick="okWork('${w.id}')">Tasdiqlash</button></div>`).join("")||'<div class="m">Hammasi tasdiqlangan</div>'}</div>`:""}`}
+async function addWork(){const qty=+$("#q").value;if(!(qty>0))return;if(err((await SB.from("works").insert({object_id:$("#o").value,kind:$("#k").value,qty})).error))return;show()}
+async function okWork(id){if(err((await SB.from("works").update({status:"approved",approved_by:me.id,approved_at:new Date().toISOString()}).eq("id",id)).error))return;show()}
+
+/* ---------- PROFIL ---------- */
+async function meView(){const[{data:ws},{data:ts}]=await Promise.all([SB.from("works").select("kind,qty").eq("user_id",me.id).eq("status","approved").gte("work_date",new Date().toISOString().slice(0,8)+"01"),SB.from("tariffs").select("*")]);
+ const T=Object.fromEntries(ts.map(t=>[t.kind,t])),by={};ws.forEach(w=>by[w.kind]=(by[w.kind]||0)+Number(w.qty));const tot=Object.entries(by).reduce((a,[k,q])=>a+q*T[k].price,0);
+ return `<h2>Shaxsiy profil</h2><div class="card"><b style="font-size:18px">${esc(me.full_name)}</b><br><span class="pill">${RN[me.role]}</span></div>
+ <div class="card" style="background:var(--d);color:#fff"><div class="m">JORIY OY HISOBLANGAN</div><div style="font-size:30px;font-weight:800">${fm(tot)} soʻm</div><div class="m">Faqat tasdiqlangan ishlar</div></div>
+ <div class="card"><b>Hisob tafsiloti</b>${Object.entries(by).map(([k,q])=>`<div class="item"><span>${esc(T[k].label)}<br><span class="m">${q} ${T[k].unit} × ${fm(T[k].price)}</span></span><b style="color:var(--g)">${fm(q*T[k].price)}</b></div>`).join("")||'<div class="m">Hali tasdiqlangan ish yoʻq</div>'}</div>
+ <button class="btn r" onclick="out()">Chiqish</button>`}
+boot();
+</script></body></html>
