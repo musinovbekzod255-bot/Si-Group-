@@ -1,0 +1,99 @@
+<!DOCTYPE html><html lang="uz"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#0aa874"><link rel="manifest" href="manifest.json"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png"><title>SI GROUP</title>
+<style>
+:root{--bg:#eef1f0;--c:#fff;--t:#10202a;--m:#7a8a90;--g:#0aa874;--gl:#e4f5ee;--me:#d9f5e8;--l:#dfe5e3;--r:#e5484d;color-scheme:light}
+@media(prefers-color-scheme:dark){:root{--bg:#0b161c;--c:#14252d;--t:#eef3f2;--m:#8fa3a9;--gl:#16382f;--me:#17463a;--l:#2a3d44;color-scheme:dark}}
+*{box-sizing:border-box}:root{--wm:linear-gradient(color-mix(in srgb,var(--bg) 92%,transparent),color-mix(in srgb,var(--bg) 92%,transparent)),url(logo.png)}html,body{height:100%;margin:0}body{background:var(--bg);color:var(--t);font:15px/1.4 system-ui,-apple-system,sans-serif}
+#app{max-width:520px;margin:0 auto;height:100dvh;display:flex;flex-direction:column;background:var(--bg)}
+header{display:flex;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0)) 14px 10px;background:var(--c);border-bottom:1px solid var(--l)}
+.lg{width:34px;height:34px;border-radius:10px;background:var(--g);color:#fff;font-weight:800;display:grid;place-items:center;flex:none}header b{display:block}header small{color:var(--m);font-size:11px}
+.ib{background:none;border:0;font-size:20px;color:var(--t);padding:4px 8px}.grow{flex:1;min-width:0}
+main{flex:1;overflow:auto;padding:10px 14px;background-image:var(--wm);background-position:center;background-repeat:no-repeat;background-size:100% 100%,min(80%,420px)}.m{color:var(--m);font-size:12px}
+.row{display:flex;align-items:center;gap:12px;background:var(--c);border:1px solid var(--l);border-radius:14px;padding:12px;margin-bottom:8px}.av{width:42px;height:42px;border-radius:50%;background:var(--gl);color:var(--g);font-weight:700;display:grid;place-items:center;flex:none}
+.pv{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--m);font-size:13px}.bd{background:var(--g);color:#fff;border-radius:12px;font-size:12px;padding:1px 8px;font-weight:700}.bd.r{background:var(--r)}
+#ch{flex:1;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:6px;background-image:var(--wm);background-position:center;background-repeat:no-repeat;background-size:100% 100%,min(80%,420px)}img.lg{background:none;border-radius:0;object-fit:contain;width:auto;height:36px}
+.b{max-width:82%;padding:8px 10px;border-radius:14px;word-break:break-word}.b.me{align-self:flex-end;background:var(--me);border-bottom-right-radius:4px}.b.ot{align-self:flex-start;background:var(--c);border:1px solid var(--l);border-bottom-left-radius:4px}
+.b img,.b video{max-width:100%;border-radius:10px;display:block}.b audio{max-width:100%;height:40px}.b .t{font-size:10px;color:var(--m);text-align:right;margin-top:2px}.fl{color:var(--g);font-weight:600;text-decoration:none;word-break:break-all}
+.tk{border-left:4px solid var(--g);padding-left:8px}.bn{background:#fdecc8;color:#7a5600;padding:8px 12px;font-size:13px}.bn.r{background:#f6dcdc;color:#b3363a}
+.cmp{background:var(--c);border-top:1px solid var(--l);padding:8px 8px calc(8px + env(safe-area-inset-bottom,0))}.cr{display:flex;gap:4px;align-items:center}
+input{font:inherit;color:var(--t);background:var(--bg);border:1px solid var(--l);border-radius:20px;padding:10px 14px;width:100%;min-width:0}
+.btn{background:var(--g);color:#fff;border:0;border-radius:12px;padding:12px;font-weight:700;font:inherit;width:100%;margin-top:8px}.btn.s{width:auto;padding:6px 12px;font-size:13px;margin-top:6px}
+#mc.rec{background:var(--r);border-radius:50%;animation:p 1s infinite}@keyframes p{50%{opacity:.4}}.tp{display:flex;flex-direction:column;gap:6px;padding-bottom:8px}.tp input{border-radius:10px}
+</style></head><body><div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+const SUPABASE_URL="https://vmkrtplwufrzvwkbylxp.supabase.co",SUPABASE_KEY="sb_publishable_PndvP80EvNUUr0ZBJDLggA_y4dlnZzF",DOMAIN="si.local";
+const SB=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),A=document.querySelector("#app"),$=s=>document.querySelector(s);
+let me,peer=null,W=[],rec=null,sig="";
+const isD=()=>me.role=="director",esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const err=e=>{if(e){alert("Xatolik: "+e.message);return true}};
+const today=()=>new Date().toLocaleDateString("en-CA",{timeZone:"Asia/Tashkent"}),dl=d=>Math.round((new Date(d)-new Date(today()))/864e5);
+const dtxt=n=>n<0?`${-n} kun kechikdi`:n==0?"bugun oxirgi kun":`${n} kun qoldi`;
+const ft=d=>new Date(d).toLocaleString("ru-RU",{day:"2-digit",month:"2-digit",hour:"2-digit",minute:"2-digit",timeZone:"Asia/Tashkent"});
+const pv=m=>({image:"📷 Rasm",video:"🎥 Video",audio:"🎤 Ovozli xabar",file:"📎 "+(m.file_name||"Fayl"),task:"📌 "+m.body}[m.kind]||m.body||"");
+
+const b64=s=>{const p="=".repeat((4-s.length%4)%4),r=atob((s+p).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from([...r].map(c=>c.charCodeAt(0)))};
+const pb=()=>("Notification" in window&&Notification.permission!="granted")?'<div class="bn" style="border-radius:12px;margin-bottom:8px;cursor:pointer" onclick="pushOn(true)">🔔 Xabar kelganini bilish uchun shu yerni bosing va bildirishnomani yoqing</div>':"";
+async function pushOn(ask){
+ if(!("serviceWorker" in navigator)||!("PushManager" in window)||!("Notification" in window)){if(ask)alert("Bu brauzer bildirishnomani qoʻllamaydi. iPhone da avval ilovani «Bosh ekranga qoʻshish» qiling va oʻsha belgidan oching.");return}
+ try{if(ask&&Notification.permission!="granted"){if(await Notification.requestPermission()!="granted")return}
+ if(Notification.permission!="granted")return;
+ const reg=await navigator.serviceWorker.register("sw.js");await navigator.serviceWorker.ready;
+ let sub=await reg.pushManager.getSubscription();
+ if(!sub){const{data,error}=await SB.functions.invoke("push",{body:{action:"key"}});if(error||!data||!data.key){if(ask)alert("Bildirishnoma xizmati hali sozlanmagan");return}
+  sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64(data.key)})}
+ const j=sub.toJSON();const{error:e2}=await SB.from("push_subs").upsert({user_id:me.id,endpoint:j.endpoint,sub:j},{onConflict:"endpoint"});
+ if(ask){alert(e2?"Saqlanmadi: "+e2.message:"Bildirishnoma yoqildi ✅");draw&&peer?draw():list&&isD()&&list()}}catch(e){if(ask)alert("Xatolik: "+e.message)}}
+async function boot(){const{data:{session}}=await SB.auth.getSession();if(!session)return loginView();
+ const{data}=await SB.from("profiles").select("*").eq("id",session.user.id).single();if(!data)return loginView();me=data;pushOn(false);
+ if(isD())list();else{const{data:d}=await SB.from("profiles").select("full_name").eq("role","director").limit(1);openChat(me.id,(d&&d[0]&&d[0].full_name)||"Direktor")}}
+function loginView(){me=null;peer=null;A.innerHTML=`<main style="display:flex;flex-direction:column;justify-content:center;background:none"><img src="logo.png" alt="SI GROUP" style="width:72%;max-width:280px;margin:0 auto 6px;display:block"><div class="m" style="text-align:center;margin-bottom:18px">Direktor va xodimlar aloqasi</div><div class="m">LOGIN</div><input id="lg" autocapitalize="off" placeholder="Loginni kiriting"><div class="m" style="margin-top:8px">PAROL</div><input id="ps" type="password" placeholder="••••••"><button class="btn" onclick="login()">Kirish</button></main>`}
+async function login(){const{error}=await SB.auth.signInWithPassword({email:$("#lg").value.trim().toLowerCase()+"@"+DOMAIN,password:$("#ps").value});if(error)return alert("Login yoki parol notoʻgʻri");boot()}
+async function out(){try{const r=await navigator.serviceWorker.getRegistration(),sub=r&&await r.pushManager.getSubscription();if(sub){await SB.from("push_subs").delete().eq("endpoint",sub.endpoint)}}catch(e){}await SB.auth.signOut();loginView()}
+
+/* ---- Direktor: xodimlar roʻyxati ---- */
+async function list(){peer=null;const[{data:ws},{data:ms}]=await Promise.all([SB.from("profiles").select("id,full_name").neq("role","director").order("full_name"),SB.from("messages").select("worker_id,sender_id,kind,body,file_name,due_date,done,read_at,created_at").order("created_at",{ascending:false}).limit(1000)]);
+ W=(ws||[]).map(w=>{const mm=(ms||[]).filter(m=>m.worker_id==w.id);return{...w,last:mm[0],un:mm.filter(m=>m.sender_id!=me.id&&!m.read_at).length,late:mm.filter(m=>m.kind=="task"&&!m.done&&dl(m.due_date)<0).length}});
+ W.sort((a,b)=>(b.last?+new Date(b.last.created_at):0)-(a.last?+new Date(a.last.created_at):0));
+ A.innerHTML=`<header><img class="lg" src="shield.png" alt="SI"><div class="grow"><b>SI GROUP</b><small>${esc(me.full_name)} · Direktor</small></div><button class="ib" onclick="out()">⎋</button></header><main>${pb()}${W.map((w,i)=>`<div class="row" onclick="openIdx(${i})"><div class="av">${esc(w.full_name.slice(0,2).toUpperCase())}</div><div class="grow"><b>${esc(w.full_name)}</b><div class="pv">${w.last?esc(pv(w.last)):"Hali xabar yoʻq"}</div></div><div>${w.late?`<span class="bd r">⛔${w.late}</span> `:""}${w.un?`<span class="bd">${w.un}</span>`:""}</div></div>`).join("")||'<div class="m" style="text-align:center;margin-top:40px">Hali xodim yoʻq.<br>Supabase → Authentication → Users orqali qoʻshing.</div>'}</main>`}
+function openIdx(i){openChat(W[i].id,W[i].full_name)}
+
+/* ---- Chat ---- */
+async function openChat(wid,name){peer={id:wid,name};await draw(true)}
+async function draw(keepTop){if(!peer)return;const old=$("#tx")?$("#tx").value:"";
+ const{data:ms,error}=await SB.from("messages").select("*").eq("worker_id",peer.id).order("created_at");if(error)return err(error);
+ sig=ms.length+":"+ms.filter(m=>m.done).length;const urls={},ps=ms.filter(m=>m.file_path).map(m=>m.file_path);
+ if(ps.length){const{data}=await SB.storage.from("chat").createSignedUrls(ps,3600);(data||[]).forEach(u=>urls[u.path]=u.signedUrl)}
+ SB.rpc("mark_read",{wid:peer.id});
+ const open=ms.filter(m=>m.kind=="task"&&!m.done),late=open.filter(m=>dl(m.due_date)<0),soon=open.filter(m=>{const n=dl(m.due_date);return n>=0&&n<=3});
+ const ban=pb()+(isD()?(late.length?`<div class="bn r">⛔ Muddati oʻtgan vazifa: ${late.length} ta</div>`:""):(late.length||soon.length?`<div class="bn ${late.length?"r":""}">${late.concat(soon).map(m=>`${late.includes(m)?"⛔":"⏳"} «${esc(m.body)}» — ${dtxt(dl(m.due_date))}. Ish yakunlandimi?`).join("<br>")}</div>`:""));
+ A.innerHTML=`<header>${isD()?'<button class="ib" onclick="list()">←</button>':'<img class="lg" src="shield.png" alt="SI">'}<div class="grow" ${isD()?'onclick="ren()"':''}><b>${esc(peer.name)}</b><small>${isD()?"Xodim (nomini oʻzgartirish uchun bosing)":"Direktor bilan aloqa"}</small></div>${isD()?"":'<button class="ib" onclick="out()">⎋</button>'}</header>${ban}
+ <div id="ch">${ms.map(m=>bub(m,urls[m.file_path])).join("")||'<div class="m" style="text-align:center;margin-top:30px">Xabarlar shu yerda koʻrinadi</div>'}</div>
+ <div class="cmp">${isD()?'<div class="tp" id="tp" hidden><input id="tb" placeholder="Vazifa matni"><input id="tdue" type="date"><button class="btn s" onclick="sendTask()">Vazifa yuborish</button></div>':""}
+ <div class="cr"><button class="ib" onclick="$('#f1').click()">📎</button><button class="ib" onclick="$('#f2').click()">📷</button>${isD()?'<button class="ib" onclick="$(\'#tp\').hidden=!$(\'#tp\').hidden">📌</button>':""}<input id="tx" placeholder="Xabar yozing…" onkeydown="if(event.key==\'Enter\')sendText()"><button class="ib" id="mc" onclick="mic()">🎤</button><button class="ib" style="color:var(--g)" onclick="sendText()">➤</button></div>
+ <input type="file" id="f1" hidden onchange="sendFile(this.files[0]);this.value=''"><input type="file" id="f2" hidden accept="image/*,video/*" onchange="sendFile(this.files[0]);this.value=''"></div>`;
+ $("#tx").value=old;const c=$("#ch");c.scrollTop=c.scrollHeight}
+function bub(m,u){const mine=m.sender_id==me.id;let c="";
+ if(m.kind=="image")c=`<a href="${u}" target="_blank"><img src="${u}" loading="lazy"></a>`;
+ else if(m.kind=="video")c=`<video src="${u}" controls playsinline preload="metadata"></video>`;
+ else if(m.kind=="audio")c=`<audio src="${u}" controls preload="metadata"></audio>`;
+ else if(m.kind=="file")c=`<a class="fl" href="${u}" target="_blank" download="${esc(m.file_name)}">📎 ${esc(m.file_name)}</a>`;
+ else if(m.kind=="task"){const n=dl(m.due_date);c=`<div class="tk"><b>📌 Vazifa</b><div>${esc(m.body)}</div><div class="m">Muddat: ${esc(m.due_date)} · ${m.done?"✅ bajarildi":dtxt(n)}</div>${!m.done&&!isD()?`<button class="btn s" onclick="fin('${m.id}')">Ishni yakunladim</button>`:""}</div>`}
+ if(m.kind!="task"&&m.body)c+=`<div>${esc(m.body)}</div>`;
+ return `<div class="b ${mine?"me":"ot"}">${c}<div class="t">${ft(m.created_at)}${mine&&m.read_at?" ✓✓":""}</div></div>`}
+async function send(o){const{error}=await SB.from("messages").insert({worker_id:peer.id,...o});if(err(error))return;draw()}
+function sendText(){const v=$("#tx").value.trim();if(!v)return;$("#tx").value="";send({kind:"text",body:v})}
+function sendTask(){const b=$("#tb").value.trim(),d=$("#tdue").value;if(!b||!d)return alert("Vazifa matni va muddatni kiriting");send({kind:"task",body:b,due_date:d})}
+async function fin(id){if(!confirm("Ish yakunlandimi?"))return;if(err((await SB.rpc("finish_task",{mid:id})).error))return;draw()}
+async function sendFile(f){if(!f)return;if(f.size>50*1048576)return alert("Fayl 50 MB dan katta. Kichikroq yuboring.");
+ const k=f.type.startsWith("image/")?"image":f.type.startsWith("video/")?"video":f.type.startsWith("audio/")?"audio":"file",ext=((f.name.split(".").pop()||"bin").replace(/[^a-z0-9]/gi,"")||"bin").slice(0,8),path=peer.id+"/"+crypto.randomUUID()+"."+ext;
+ $("#tx").placeholder="Yuborilmoqda…";const{error}=await SB.storage.from("chat").upload(path,f,{contentType:f.type||"application/octet-stream"});if(err(error))return draw();
+ send({kind:k,file_path:path,file_name:f.name,mime:f.type})}
+async function mic(){if(rec){rec.stop();return}
+ try{const st=await navigator.mediaDevices.getUserMedia({audio:true}),ch=[];rec=new MediaRecorder(st);rec.ondataavailable=e=>ch.push(e.data);
+ rec.onstop=()=>{st.getTracks().forEach(t=>t.stop());const type=rec.mimeType||"audio/webm";rec=null;$("#mc").classList.remove("rec");sendFile(new File([new Blob(ch,{type})],"ovozli-xabar."+(type.includes("mp4")?"m4a":"webm"),{type}))};
+ rec.start();$("#mc").classList.add("rec")}catch(e){alert("Mikrofonga ruxsat bering")}}
+async function ren(){const n=prompt("Xodim ismi:",peer.name);if(!n||!n.trim())return;if(err((await SB.from("profiles").update({full_name:n.trim()}).eq("id",peer.id)).error))return;peer.name=n.trim();draw()}
+setInterval(async()=>{if(!me||document.visibilityState!="visible"||rec)return;
+ if(peer){const{data}=await SB.from("messages").select("id,done").eq("worker_id",peer.id);if(data&&data.length+":"+data.filter(x=>x.done).length!=sig)draw()}else if(isD()&&$("main"))list()},6000);
+boot();
+</script></body></html>
